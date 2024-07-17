@@ -59,10 +59,13 @@ struct helper<T, T1, T2, Args...> : helper<T, Args...> {
       // Data point is less than left boundary
       mid = 0;
       weight = 1.;
+      if (*nd >= 2) {
+        weight = (xd[mid + 1] - x) / (xd[mid + 1] - xd[mid]);
+      }
     } else if (x >= xd[*nd - 1]) {
       // Data point is greater than right boundary
       mid = *nd - 2;
-      weight = 0.;
+      weight = (xd[mid + 1] - x) / (xd[mid + 1] - xd[mid]);
     } else {
       // Binary search to find tick
       Index lo = 0, hi = *nd - 2;
@@ -156,7 +159,7 @@ static void interp(const Index *nd, Index ni, const T *yd, T *yi,
           factor *= 1 - weights[i];
         }
       }
-      if (factor > std::numeric_limits<T>::epsilon()) {
+      if (factor > std::numeric_limits<T>::epsilon() || factor < -std::numeric_limits<T>::epsilon()) {
         const Index k = Order::template mux<Index, Dimension>(nd, buffer);
         yi[n] += factor * yd[k];
       }
